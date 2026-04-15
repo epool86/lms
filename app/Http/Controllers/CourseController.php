@@ -67,6 +67,7 @@ class CourseController extends Controller
             'category_id' => 'required|exists:categories,id',
             'price' => 'required|numeric|min:0',
             'status' => 'required|in:open,closed',
+            'sequential_unlock' => 'nullable|boolean',
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240'
         ]);
 
@@ -76,7 +77,8 @@ class CourseController extends Controller
             'description' => $request->description,
             'category_id' => $request->category_id,
             'price' => $request->price,
-            'status' => $request->status
+            'status' => $request->status,
+            'sequential_unlock' => $request->boolean('sequential_unlock'),
         ];
 
         // Handle cover image upload
@@ -127,6 +129,7 @@ class CourseController extends Controller
             'category_id' => 'required|exists:categories,id',
             'price' => 'required|numeric|min:0',
             'status' => 'required|in:open,closed',
+            'sequential_unlock' => 'nullable|boolean',
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240'
         ]);
 
@@ -137,6 +140,7 @@ class CourseController extends Controller
             'price',
             'status'
         ]);
+        $courseData['sequential_unlock'] = $request->boolean('sequential_unlock');
 
         // Handle cover image upload
         if ($request->hasFile('cover_image')) {

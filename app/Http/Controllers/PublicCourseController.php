@@ -14,7 +14,10 @@ class PublicCourseController extends Controller
     public function index(Request $request)
     {
         $query = Course::with(['trainer', 'category'])
-            ->where('status', 'open');
+            ->where('status', 'open')
+            ->whereHas('trainer', function ($trainerQuery) {
+                $trainerQuery->whereNull('suspended_at');
+            });
 
         // Search by title or description
         if ($request->filled('search')) {
@@ -62,9 +65,13 @@ class PublicCourseController extends Controller
 
         $courses = $query->paginate(9)->withQueryString();
         $categories = Category::withCount(['courses' => function ($q) {
-            $q->where('status', 'open');
+            $q->where('status', 'open')
+                ->whereHas('trainer', function ($trainerQuery) {
+                    $trainerQuery->whereNull('suspended_at');
+                });
         }])->get();
         $trainers = User::whereJsonContains('roles', 'trainer')
+            ->whereNull('suspended_at')
             ->withCount(['courses' => function ($q) {
                 $q->where('status', 'open');
             }])
@@ -76,8 +83,7 @@ class PublicCourseController extends Controller
 
     public function show(Course $course)
     {
-        // Only show open courses
-        if ($course->status !== 'open') {
+        if (! $this->isPubliclyAvailableCourse($course)) {
             abort(404);
         }
 
@@ -91,8 +97,7 @@ class PublicCourseController extends Controller
      */
     public function coverImage(Course $course, $type = 'thumbnail')
     {
-        // Only show images for open courses
-        if ($course->status !== 'open') {
+        if (! $this->isPubliclyAvailableCourse($course)) {
             abort(404);
         }
 
@@ -118,8 +123,7 @@ class PublicCourseController extends Controller
      */
     public function showMaterial(Course $course, CourseMaterial $material)
     {
-        // Only show for open courses
-        if ($course->status !== 'open') {
+        if (! $this->isPubliclyAvailableCourse($course)) {
             abort(404);
         }
 
@@ -141,8 +145,7 @@ class PublicCourseController extends Controller
      */
     public function streamMaterial(Course $course, CourseMaterial $material)
     {
-        // Only show for open courses
-        if ($course->status !== 'open') {
+        if (! $this->isPubliclyAvailableCourse($course)) {
             abort(404);
         }
 
@@ -166,5 +169,20 @@ class PublicCourseController extends Controller
             'Content-Type' => $material->mime_type,
             'Content-Disposition' => 'inline; filename="' . $material->file_name . '"',
         ]);
+    }
+
+    private function isPubliclyAvailableCourse(Course $course): bool
+    {
+        if ($course->status !== 'open') {
+            return false;
+        }
+
+        $course->loadMissing('trainer');
+
+        if (! $course->trainer) {
+            return false;
+        }
+
+        return is_null($course->trainer->suspended_at);
     }
 }

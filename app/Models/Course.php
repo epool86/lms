@@ -3,10 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
 class Course extends Model
 {
+    use SoftDeletes;
+
     protected $fillable = [
         'user_id',
         'category_id',
@@ -15,12 +18,14 @@ class Course extends Model
         'description',
         'price',
         'status',
+        'sequential_unlock',
         'cover_image',
         'cover_image_thumbnail'
     ];
 
     protected $casts = [
-        'price' => 'decimal:2'
+        'price' => 'decimal:2',
+        'sequential_unlock' => 'boolean',
     ];
 
     protected static function boot()
@@ -34,7 +39,7 @@ class Course extends Model
                 // Ensure slug is unique
                 $originalSlug = $course->slug;
                 $count = 1;
-                while (static::where('slug', $course->slug)->exists()) {
+                while (static::withTrashed()->where('slug', $course->slug)->exists()) {
                     $course->slug = $originalSlug . '-' . $count;
                     $count++;
                 }
@@ -60,6 +65,11 @@ class Course extends Model
     public function materials()
     {
         return $this->hasMany(CourseMaterial::class);
+    }
+
+    public function orderedMaterials()
+    {
+        return $this->hasMany(CourseMaterial::class)->orderBy('order')->orderBy('id');
     }
 
     public function enrollments()

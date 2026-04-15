@@ -18,8 +18,8 @@ class EnrollmentController extends Controller
      */
     public function checkout(Course $course)
     {
-        // Only allow enrollment for open courses
-        if ($course->status !== 'open') {
+        // Only allow enrollment for publicly available courses
+        if ($course->status !== 'open' || ($course->trainer && $course->trainer->suspended_at)) {
             abort(404);
         }
 
@@ -29,6 +29,21 @@ class EnrollmentController extends Controller
         if (Auth::check() && $course->isEnrolled(Auth::user())) {
             return redirect()->route('courses.show', $course)
                 ->with('info', 'You are already enrolled in this course.');
+        }
+
+        // Free course + authenticated user: skip checkout entirely
+        if ($course->price == 0 && Auth::check()) {
+            $enrollment = Enrollment::create([
+                'course_id' => $course->id,
+                'user_id' => Auth::id(),
+                'amount' => 0,
+                'payment_method' => 'chip',
+                'payment_status' => 'pending',
+            ]);
+            $enrollment->markAsPaid(['method' => 'free']);
+
+            return redirect()->route('app.learn.show', $course->slug)
+                ->with('success', 'You have been enrolled successfully!');
         }
 
         // Get trainer payment settings
@@ -62,8 +77,8 @@ class EnrollmentController extends Controller
      */
     public function process(Request $request, Course $course)
     {
-        // Only allow enrollment for open courses
-        if ($course->status !== 'open') {
+        // Only allow enrollment for publicly available courses
+        if ($course->status !== 'open' || ($course->trainer && $course->trainer->suspended_at)) {
             abort(404);
         }
 

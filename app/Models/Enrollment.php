@@ -20,7 +20,10 @@ class Enrollment extends Model
         'chip_purchase_id',
         'payment_proof',
         'status',
+        'progress_percentage',
         'enrolled_at',
+        'last_accessed_at',
+        'completed_at',
         'expires_at',
         'payment_data',
     ];
@@ -28,8 +31,11 @@ class Enrollment extends Model
     protected $casts = [
         'amount' => 'decimal:2',
         'enrolled_at' => 'datetime',
+        'last_accessed_at' => 'datetime',
+        'completed_at' => 'datetime',
         'expires_at' => 'datetime',
         'payment_data' => 'array',
+        'progress_percentage' => 'integer',
     ];
 
     protected static function boot()
@@ -50,7 +56,7 @@ class Enrollment extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class)->withTrashed();
     }
 
     /**
@@ -91,11 +97,11 @@ class Enrollment extends Model
     }
 
     /**
-     * Scope for active enrollments
+     * Scope for enrollments that grant access (active or completed).
      */
     public function scopeActive($query)
     {
-        return $query->where('status', 'active')->where('payment_status', 'paid');
+        return $query->whereIn('status', ['active', 'completed'])->where('payment_status', 'paid');
     }
 
     /**
@@ -104,5 +110,59 @@ class Enrollment extends Model
     public function scopePending($query)
     {
         return $query->where('payment_status', 'pending');
+    }
+
+    public function scopeInProgress($query)
+    {
+        return $query->where('status', 'active')->where('payment_status', 'paid')->where('progress_percentage', '<', 100);
+    }
+
+    public function scopeCompleted($query)
+    {
+        return $query->where('status', 'completed');
+    }
+
+    public function progress()
+    {
+        return $this->hasMany(LessonProgress::class);
+    }
+
+    public function recalculateProgress(): void
+    {
+        $totalMaterials = $this->course->materials()->count();
+
+        if ($totalMaterials === 0) {
+            $this->update(['progress_percentage' => 0]);
+            return;
+        }
+
+        $completedCount = $this->progress()->where('completed', true)->count();
+        $percentage = (int) floor(($completedCount / $totalMaterials) * 100);
+
+        $data = ['progress_percentage' => $percentage];
+
+        if ($percentage >= 100 && $this->status !== 'completed') {
+            $data['status'] = 'completed';
+            $data['completed_at'] = now();
+        } elseif ($percentage < 100 && $this->status === 'completed') {
+            $data['status'] = 'active';
+            $data['completed_at'] = null;
+        }
+
+        $this->update($data);
+    }
+
+    public function lastAccessedMaterial(): ?CourseMaterial
+    {
+        $progress = $this->progress()
+            ->whereNotNull('last_accessed_at')
+            ->orderByDesc('last_accessed_at')
+            ->first();
+
+        if ($progress) {
+            return $progress->material;
+        }
+
+        return $this->course->materials()->orderBy('order')->orderBy('id')->first();
     }
 }

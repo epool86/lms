@@ -6,7 +6,22 @@
       "Bash(php artisan view:clear:*)",
       "Bash(php artisan:*)",
       "Bash(composer:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(grep -l \"student\\\\|library\\\\|my-courses\\\\|progress\" /mnt/c/laragon/www/mylms/app/Http/Controllers/*.php)",
+      "Bash(php -l app/Http/Middleware/EnsureEnrolled.php)",
+      "Bash(php -l app/Policies/CourseMaterialPolicy.php)",
+      "Bash(php -l app/Http/Controllers/EnrollmentController.php)",
+      "Bash(php -l app/Http/Controllers/LearningController.php)",
+      "Bash(php -l app/Http/Controllers/LearningProgressController.php)",
+      "Bash(ls /mnt/c/laragon/www/mylms/.env*)",
+      "Bash(php -l app/Http/Controllers/CourseController.php)",
+      "Bash(curl -s -o /tmp/resp.html -w \"/ HTTP %{http_code}\\\\n\" http://127.0.0.1:8765/)",
+      "Bash(curl -sL -o /dev/null -w \"/app/my-courses HTTP %{http_code} \\(final\\)\\\\n\" http://127.0.0.1:8765/app/my-courses)",
+      "Bash(curl -s -o /dev/null -w \"/courses HTTP %{http_code}\\\\n\" http://127.0.0.1:8765/courses)",
+      "Bash(curl -s -o /dev/null -w \"/app/learn/xyz HTTP %{http_code}\\\\n\" http://127.0.0.1:8765/app/learn/xyz)",
+      "Bash(pkill -f \"artisan serve\")",
+      "Bash(ls database/migrations/2026_04_15_*)",
+      "Bash(grep -i admin echo \"\" echo \"--- Admin views ---\" find resources/views/settings resources/views/admin)"
     ],
     "deny": [],
     "ask": []

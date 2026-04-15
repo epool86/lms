@@ -110,6 +110,17 @@
                         <small class="form-text text-muted">Open courses are visible to students, closed courses are hidden</small>
                     </div>
 
+                    <div class="mb-4">
+                        <div class="form-check form-switch">
+                            <input type="hidden" name="sequential_unlock" value="0">
+                            <input class="form-check-input" type="checkbox" role="switch"
+                                   id="sequential_unlock" name="sequential_unlock" value="1"
+                                   {{ old('sequential_unlock') ? 'checked' : '' }}>
+                            <label class="form-check-label" for="sequential_unlock">Sequential Unlock</label>
+                        </div>
+                        <small class="form-text text-muted">When enabled, students must complete each material in order before unlocking the next one.</small>
+                    </div>
+
                     <div class="d-flex justify-content-end gap-2">
                         <a href="{{ route('app.courses.index') }}" class="btn btn-secondary">Cancel</a>
                         <button type="submit" class="btn btn-primary">

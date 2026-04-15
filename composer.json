@@ -7,6 +7,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "barryvdh/laravel-dompdf": "^3.1",
         "chip/chip-sdk-php": "^1.1",
         "intervention/image-laravel": "^1.5",
         "laravel/framework": "^12.0",

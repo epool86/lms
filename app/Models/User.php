@@ -4,13 +4,14 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -26,6 +27,8 @@ class User extends Authenticatable
         'logo',
         'plan',
         'validity',
+        'suspended_at',
+        'suspension_reason',
         'trainer_settings',
     ];
 
@@ -52,6 +55,7 @@ class User extends Authenticatable
             'password' => 'hashed',
             'roles' => 'array',
             'validity' => 'date',
+            'suspended_at' => 'datetime',
             'trainer_settings' => 'array',
         ];
     }
@@ -103,13 +107,18 @@ class User extends Authenticatable
         return $this->hasMany(Enrollment::class);
     }
 
+    public function activeEnrollments()
+    {
+        return $this->hasMany(Enrollment::class)->active();
+    }
+
     /**
      * Get the enrolled courses for this user.
      */
     public function enrolledCourses()
     {
         return $this->belongsToMany(Course::class, 'enrollments')
-            ->wherePivot('status', 'active')
+            ->wherePivotIn('status', ['active', 'completed'])
             ->wherePivot('payment_status', 'paid');
     }
 
@@ -120,8 +129,13 @@ class User extends Authenticatable
     {
         return $this->enrollments()
             ->where('course_id', $course->id)
-            ->where('status', 'active')
+            ->whereIn('status', ['active', 'completed'])
             ->where('payment_status', 'paid')
             ->exists();
+    }
+
+    public function isSuspended(): bool
+    {
+        return ! is_null($this->suspended_at);
     }
 }

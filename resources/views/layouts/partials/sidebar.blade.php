@@ -3,7 +3,7 @@
         <h6 class="mb-3">Main Menu</h6>
         <ul class="mb-3 pb-1">
             <li>
-                <a href="{{ route('app.dashboard') }}" class="d-inline-flex align-items-center {{ request()->routeIs('app.dashboard') ? 'active' : '' }}">
+                <a href="{{ route('app.dashboard') }}" class="d-inline-flex align-items-center {{ request()->routeIs('app.dashboard') || request()->routeIs('app.admin.dashboard') ? 'active' : '' }}">
                     <i class="isax isax-home-2 me-2"></i><span>Dashboard</span>
                 </a>
             </li>
@@ -13,8 +13,13 @@
         <h6 class="mb-3">Student Menu</h6>
         <ul class="mb-3 pb-1">
             <li>
-                <a href="#" class="d-inline-flex align-items-center">
+                <a href="{{ route('app.my-courses.index') }}" class="d-inline-flex align-items-center {{ request()->routeIs('app.my-courses.*') ? 'active' : '' }}">
                     <i class="isax isax-book me-2"></i><span>My Courses</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('app.my-purchases.index') }}" class="d-inline-flex align-items-center {{ request()->routeIs('app.my-purchases.*') ? 'active' : '' }}">
+                    <i class="isax isax-receipt-1 me-2"></i><span>Purchase History</span>
                 </a>
             </li>
         </ul>
@@ -45,18 +50,23 @@
         <h6 class="mb-3">Admin Section</h6>
         <ul class="mb-3 pb-1">
             <li>
-                <a href="#" class="d-inline-flex align-items-center">
+                <a href="{{ route('app.admin.trainers.index') }}" class="d-inline-flex align-items-center {{ request()->routeIs('app.admin.trainers.*') ? 'active' : '' }}">
                     <i class="isax isax-teacher me-2"></i><span>Manage Trainer</span>
                 </a>
             </li>
             <li>
-                <a href="#" class="d-inline-flex align-items-center">
+                <a href="{{ route('app.admin.courses.index') }}" class="d-inline-flex align-items-center {{ request()->routeIs('app.admin.courses.*') ? 'active' : '' }}">
                     <i class="isax isax-book-square me-2"></i><span>Manage Courses</span>
                 </a>
             </li>
             <li>
-                <a href="#" class="d-inline-flex align-items-center">
+                <a href="{{ route('app.admin.students.index') }}" class="d-inline-flex align-items-center {{ request()->routeIs('app.admin.students.*') ? 'active' : '' }}">
                     <i class="isax isax-people me-2"></i><span>Manage Student</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('app.admin.reports.index') }}" class="d-inline-flex align-items-center {{ request()->routeIs('app.admin.reports.*') ? 'active' : '' }}">
+                    <i class="isax isax-chart-21 me-2"></i><span>Reports</span>
                 </a>
             </li>
             <li>

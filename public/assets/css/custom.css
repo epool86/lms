@@ -1,6 +1,31 @@
 /* Custom CSS for AzbahriLMS */
 
 /* =============================================
+   Modal z-index fix - ensure modals appear above backdrop
+   ============================================= */
+.modal-backdrop {
+    z-index: 1040 !important;
+}
+
+.modal {
+    z-index: 1050 !important;
+}
+
+.modal-dialog {
+    pointer-events: auto !important;
+}
+
+.modal-content {
+    pointer-events: auto !important;
+}
+
+/* Ensure header doesn't block modals */
+.header,
+.header-fixed {
+    z-index: 1030 !important;
+}
+
+/* =============================================
    Dark Mode Cards - Better visibility
    ============================================= */
 
@@ -710,7 +735,6 @@
     position: relative;
     background-color: #392C7D;
     padding: 155px 0 80px;
-    z-index: 0;
     overflow: hidden;
     min-height: calc(100vh - 80px);
 }
@@ -1194,16 +1218,22 @@
    Breadcrumb Bar - Purple Background
    ============================================= */
 .breadcrumb-bar {
-    background-color: #392C7D !important;
+    background: #392C7D !important;
+    background-image: none !important;
     padding: 40px 0;
+    margin-bottom: 40px;
 }
 
 .dark-mode .breadcrumb-bar {
-    background-color: #392C7D !important;
+    background: #392C7D !important;
+    background-image: none !important;
 }
 
 .breadcrumb-bar .breadcrumb-title {
     color: #FFFFFF !important;
+    font-weight: 600;
+    text-shadow: none;
+    opacity: 1;
 }
 
 .breadcrumb-bar .breadcrumb {
